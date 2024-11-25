@@ -1,0 +1,87 @@
+# https://www.codeac.io/documentation/pylint-configuration.html
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#design-checker-options
+
+[MASTER]
+; init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()))"
+ignore=C0103
+ignore-patterns=venv,build,dist,devops
+max-line-length=131
+disable=unnecessary-pass,
+        missing-module-docstring,
+        no-name-in-module,
+        too-few-public-methods,
+        logging-fstring-interpolation,
+        broad-except,
+        bare-except,
+        too-many-locals,
+        consider-using-f-string,
+        invalid-name,
+        raise-missing-from,
+        too-many-arguments,
+        dangerous-default-value,
+        duplicate-code,
+        astroid-error,
+        no-member
+
+[MESSAGES CONTROL]
+
+
+
+[REPORTS]
+
+
+
+
+[REFACTORING]
+
+
+
+[VARIABLES]
+
+
+
+[BASIC]
+
+
+[SPELLING]
+
+
+[TYPECHECK]
+
+
+
+[FORMAT]
+max-line-length=250
+
+
+[LOGGING]
+
+
+
+[MISCELLANEOUS]
+
+
+
+[SIMILARITIES]
+
+
+[IMPORTS]
+allow-any-import-level=
+
+
+[DESIGN]
+max-args=5
+max-attributes=8
+max-bool-expr=5
+max-branches=12
+max-locals=20
+max-parents=7
+max-public-methods=20
+max-returns=6
+max-statements=50
+min-public-methods=1
+
+
+[CLASSES]
+
+[EXCEPTIONS]
