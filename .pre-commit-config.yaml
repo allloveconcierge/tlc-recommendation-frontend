@@ -37,12 +37,12 @@ repos:
         args: [--line-length=131]
 -   repo: local
     hooks:
-    # -   id: pytest
-    #     name: pytest
-    #     language: system
-    #     entry: poetry run pytest tests/unit_tests
-    #     pass_filenames: false
-    #     always_run: true
+    -   id: pytest
+        name: pytest
+        language: system
+        entry: poetry run pytest tests/
+        pass_filenames: false
+        always_run: true
         # stages: [commit]
     -   id: pylint
         name: pylint
