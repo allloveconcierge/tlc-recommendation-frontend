@@ -1,0 +1,52 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-docstring-first
+    -   id: check-executables-have-shebangs
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: check-toml
+    -   id: check-yaml
+    -   id: debug-statements
+    -   id: detect-aws-credentials
+    -   id: detect-private-key
+    -   id: end-of-file-fixer
+    -   id: mixed-line-ending
+    -   id: requirements-txt-fixer
+    -   id: pretty-format-json
+        args: [--autofix, --indent=4]
+        exclude: ^devops/cd/envConfig\.json$
+    -   id: trailing-whitespace
+-   repo: https://github.com/PyCQA/flake8
+    rev: 5.0.4
+    hooks:
+    -   id: flake8
+        additional_dependencies: [flake8-typing-imports==1.10.0]
+        exclude: ^(.pre-commit-config.yaml|venv|build|dist|devops|docs|site-pacakges)/$
+        args:
+        -   --ignore=D203,E251,E722,C901,W291
+        -   --max-complexity=10
+        -   --max-line-length=131
+-   repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+    -   id: black
+        exclude: ^(.pre-commit-config.yaml|local.vars|venv|build|dist|devops|docs|site-pacakges)/$
+        args: [--line-length=131]
+-   repo: local
+    hooks:
+    -   id: pytest
+        name: pytest
+        language: system
+        entry: poetry run pytest tests/
+        pass_filenames: false
+        always_run: true
+        # stages: [commit]
+    -   id: pylint
+        name: pylint
+        language: system
+        entry: pylint --rcfile=.pylintrc app
+        files: \.py$
+        exclude: ^(venv|build|dist|devops)/
