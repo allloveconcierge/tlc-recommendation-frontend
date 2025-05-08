@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any, Optional, Union
 
+from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic_settings.sources import DotenvType, ENV_FILE_SENTINEL
 
@@ -47,4 +48,46 @@ class APISettings(BaseSettings):
     )
 
     auto_reload: Optional[bool] = False
+
+
+class LLMSettings(BaseSettings):
+    # Application settings
+    app_name: str = "LLM Service API"
+    debug: bool = False
+    
+    # LLM provider settings
+    llm_provider: str = "claude"  # Options: claude, openai, gemini, gemma, flash
+    
+    # Claude settings
+    claude_api_key: str = ""
+    claude_model: str = "claude-3-7-sonnet-20250219"
+    
+    # OpenAI settings
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o"
+    
+    # Google settings
+    google_api_key: str = ""
+    gemini_model: str = "gemini-2.5-pro-preview-03-25"
+    
+    # Gemma settings
+    gemma_api_key: str = ""
+    gemma_model: str = "gemma-7b"
+    
+    # Flash settings
+    flash_api_key: str = ""
+    flash_model: str = "gemini-2.5-flash-preview-04-17"
+    
+    # Timeout settings
+    request_timeout: int = 30  # seconds
+    
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        extra="ignore"
+
+@lru_cache()
+def get_settings():
+    print('I got to get_settings')
+    return LLMSettings()
 
