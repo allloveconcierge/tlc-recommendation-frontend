@@ -55,7 +55,6 @@ async def get_recommendations(
         result = await service.generate_recommendation(request_params)
         return responses.ORJSONResponse(result.model_dump())
     except Exception as e:
-        print(f'The following error occurred: {e}')
         raise HTTPException(status_code=500, detail=str(e))
 
 

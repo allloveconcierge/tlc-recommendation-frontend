@@ -56,7 +56,8 @@ class LLMSettings(BaseSettings):
     debug: bool = False
     
     # LLM provider settings
-    llm_provider: str = "claude"  # Options: claude, openai, gemini, gemma, flash
+    # ToDo: make this configurable in client initialization
+    llm_provider: str = "gemini"  # Options: claude, openai, gemini, gemma, flash
     
     # Claude settings
     claude_api_key: str = ""
@@ -88,6 +89,5 @@ class LLMSettings(BaseSettings):
 
 @lru_cache()
 def get_settings():
-    print('I got to get_settings')
     return LLMSettings()
 

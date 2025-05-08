@@ -18,7 +18,7 @@ class GeminiClient(LLMClient):
     async def generate(
         self, 
         prompt: str, 
-        max_tokens: Optional[int] = 5000,
+        # max_tokens: Optional[int] = 5000,
         temperature: Optional[float] = 0.7,
         **kwargs
     ) -> Dict[str, Any]:
@@ -27,7 +27,9 @@ class GeminiClient(LLMClient):
             response = model.generate_content(
                 prompt,
                 generation_config={
-                    "max_output_tokens": max_tokens,
+                    # we can't afford to have truncated output, the result would be unparseable.
+                    # ToDO: add result parsing logic that will support max_token and trucated output
+                    # "max_output_tokens": max_tokens,
                     "temperature": temperature,
                     **kwargs
                 }
