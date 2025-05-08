@@ -7,7 +7,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 pylint = "^3.3.4"
 fastapi = "^0.115.8"
 starlette = "^0.45.3"
@@ -16,6 +16,11 @@ requests = "^2.32.3"
 pydantic = "^2.10.3"
 pydantic-settings = "^2.7.1"
 orjson = "^3.10.15"
+anthropic = "^0.50.0"
+openai = "^1.77.0"
+google-generativeai = "^0.8.5"
+httpx = "^0.28.1"
+pandas = "^2.2.3"
 
 
 [tool.poetry.group.dev.dependencies]

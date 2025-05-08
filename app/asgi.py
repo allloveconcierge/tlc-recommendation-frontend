@@ -1,7 +1,9 @@
 import os
-from fastapi import FastAPI
 import uvicorn
+
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.event_handlers import start_app_handler, stop_app_handler
 from app.api.controllers.routes import router
@@ -19,6 +21,14 @@ def get_app() -> FastAPI:
     fast_app.include_router(router=router)
     fast_app.add_event_handler("startup", start_app_handler(fast_app))
     fast_app.add_event_handler("shutdown", stop_app_handler(fast_app))
+    # Add CORS middleware
+    fast_app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Update this for production
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     return fast_app
 
 
