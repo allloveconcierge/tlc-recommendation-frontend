@@ -34,19 +34,19 @@ def create_general_recommendation_prompt(request, categories):
 
     Use the following JSON format for your response:
     [
-            {{
-                "title": "Recommendation title",
-                "product": "Name of Gift/Experience (might also be the same as title)",
-                "category": "Gift/Experience Category",
-                "explanation": "Why this gift/experience is suitable",
-                "store": "thortful.com",
-                "relevance_score": 0.95,  # A score between 0 and 1 indicating how well it matches preferences
-                "metadata": {{
-                    "key1": "value1",
-                    "key2": "value2"
-                }}
-            }},
-        ... more recommendationsDatab
+        {{
+            "title": "Recommendation title",
+            "product": "Name of Gift/Experience (might also be the same as title)",
+            "category": "Gift/Experience Category",
+            "explanation": "Why this gift/experience is suitable",
+            "store": "thortful.com",
+            "relevance_score": 0.95,  # A score between 0 and 1 indicating how well it matches preferences
+            "metadata": {{
+                "key1": "value1",
+                "key2": "value2"
+            }}
+        }},
+        ... more recommendations
     ]
 
     Note:
@@ -66,11 +66,11 @@ def create_recommendation_for_moment_prompt(request):
     You are a gift recommendation specialist who focuses EXCLUSIVELY on milestone moments. Your expertise is creating deeply meaningful, occasion-specific gifts that commemorate life's significant moments.
 
     Recipient & Moment Details:
-    - ID: {request.profile_id}
-    - Age: {request.age}
-    - Gender: {request.gender}
+    - ID: {request.profile.profile_id}
+    - Age: {request.profile.age}
+    - Gender: {request.profile.gender}
     - Interests: {request.profile_interests}
-    - Relationship to Gifter: {request.relationship}
+    - Relationship to Gifter: {request.profile.relationship}
     - MILESTONE EVENT: {request.moment_type}
     - EVENT DATE: {request.moment_date}
     - Days Until Event: {(pd.to_datetime(request.moment_date) - pd.Timestamp.now()).days if pd.notna(request.moment_date) else 'Unknown'}
@@ -112,23 +112,23 @@ def create_recommendation_for_moment_prompt(request):
     - PERSONALIZED COMMEMORATION: A highly customized item marking this specific achievement
     - FUTURE-FOCUSED MILESTONE GIFT: Something that grows in meaning or value over time
 
-    Use this JSON format:
+    Use this JSON format for your response:
 
-    {{
-      "user_id": "{request.id}",
-      "milestone_event": "{request.moment_type}",
-      "event_date": "{request.moment_date}",
-      "milestone_recommendations": [
+    [
         {{
-          "Product": "Name of the milestone gift",
-          "Gift_Type": "SYMBOLIC KEEPSAKE/EXPERIENTIAL MILESTONE MARKER/TRADITIONAL MILESTONE GIFT/PERSONALIZED COMMEMORATION/FUTURE-FOCUSED MILESTONE GIFT",
-          "Explanation": "Detailed explanation of why this gift has SPECIAL SIGNIFICANCE for this specific life milestone",
-          "Store": "Specific UK retailer or artisan who specializes in milestone gifts"
+            "title": "Recommendation title",
+            "product": "Name of the milestone gift",
+            "gift_type": "SYMBOLIC KEEPSAKE/EXPERIENTIAL MILESTONE MARKER/TRADITIONAL MILESTONE GIFT/PERSONALIZED COMMEMORATION/FUTURE-FOCUSED MILESTONE GIFT",
+            "explanation": "Detailed explanation of why this gift has SPECIAL SIGNIFICANCE for this specific life milestone",
+            "store": "Specific UK retailer or artisan who specializes in milestone gifts"
+            "relevance_score": 0.95,  # A score between 0 and 1 indicating how well it matches preferences
+            "metadata": {{
+                "key1": "value1",
+                "key2": "value2"
+            }}
         }},
-        ...
-      ]
-    }}
-
+        ... more recommendations
+    ]
     MILESTONE-SPECIFIC CONSIDERATIONS:
     - BIRTHDAYS: Age milestone traditions (18th, 21st, 30th, etc.), birth stone/flower, "coming of age" items
     - ANNIVERSARIES: Traditional gifts by year (1st: paper, 5th: wood, 25th: silver, etc.), commemorative items
@@ -142,7 +142,7 @@ def create_recommendation_for_moment_prompt(request):
     Focus only on MILESTONE-MARKING gifts that would be inappropriate for everyday occasions.
     """
 
-def create_default_prompt(self, request: RecommendationRequest) -> str:
+def create_default_prompt(request: RecommendationRequest) -> str:
     """Create a prompt for the LLM based on the recommendation request."""
     return f"""
     Your task is to generate {request.count} recommendations in the category of {request.category}.
