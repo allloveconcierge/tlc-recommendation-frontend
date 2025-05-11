@@ -2,17 +2,22 @@ import datetime
 import json
 import logging
 import time
+from typing import Union
 
 from app.api.schemas.recommendations import (
     CategoriesResponse,
+    GeneralRecommendationItem,
+    MomentRecommendationItem,
+    MomentsRecommendationRequest,
+    MomentsRecommendationResponse,
     RecommendationRequest,
     RecommendationResponse,
-    RecommendationItem,
 )
 from app.core.services.llm.base import LLMClient
 from app.core.services.prompts.v1 import (
     create_category_determination_prompt,
     create_general_recommendation_prompt,
+    create_recommendation_for_moment_prompt,
 )
 
 
@@ -22,9 +27,9 @@ class RecommendationService:
     def __init__(self, llm_client: LLMClient):
         self.llm_client = llm_client
         
-    async def generate_recommendation(self, request: RecommendationRequest) -> RecommendationResponse:
+    async def generate_recommendations(self, request: RecommendationRequest) -> RecommendationResponse:
         """
-        Generate recommendations based on user preferences.
+        Generate general recommendations based on a profile's preferences.
         
         Args:
             request: The recommendation request
@@ -38,32 +43,87 @@ class RecommendationService:
         response = await self._get_categories(request)
         logger.info(f'Creating prompt with categories {response}')
         prompt = create_general_recommendation_prompt(request, response.categories)
-
-
         
+
         # Generate recommendations from the LLM
-        logger.info(f'Making call to LLM for general recommendations with prompt: {prompt}')
+        logger.info(f'Making call to LLM for recommendations with prompt: {prompt}')
         llm_response = await self.llm_client.generate(
             prompt=prompt,
             # max_tokens=5000,
             temperature=0.7
         )
-        
+
         # Parse the LLM response into recommendation items
         recommendations = self._parse_recommendations(llm_response["text"], request.count)
 
         end_time = time.time()
         execution_time = end_time - start_time
         logger.info(f"Recommendation took {execution_time:.6f} seconds to execute end-to-end.")
-        
+
         return RecommendationResponse(
             profile_id=request.profile.profile_id,
             recommendations=recommendations,
             generated_at=datetime.datetime.now().isoformat(),
             provider=self.llm_client.provider_name
         )
-    
-    async def _get_categories(self, request) -> CategoriesResponse:
+
+
+    async def generate_recommendations_for_moments(self, request: MomentsRecommendationRequest) -> MomentsRecommendationResponse:
+        """
+        Generates moment-specific recommendations based on a profile's preferences.
+        
+        Args:
+            request: The recommendation request
+            recomendation_type: the type of recommendation to be made; available options are general or moments
+            
+        Returns:
+            A recommendation response with recommended items
+        """
+        start_time = time.time()
+
+        # Create a prompt for the LLM
+        prompt = create_recommendation_for_moment_prompt(request)
+        
+
+        # Generate recommendations from the LLM
+        logger.info(f'Making call to LLM for momemt-specific recommendations with prompt: {prompt}')
+        llm_response = await self.llm_client.generate(
+            prompt=prompt,
+            # max_tokens=5000,
+            temperature=0.7
+        )
+
+        # Parse the LLM response into recommendation items
+        recommendations = self._parse_recommendations(
+            llm_response["text"],
+            request.count,
+            recommendation_type='moments'
+        )
+
+        end_time = time.time()
+        execution_time = end_time - start_time
+        logger.info(f"Recommendation took {execution_time:.6f} seconds to execute end-to-end.")
+
+        return MomentsRecommendationResponse(
+            profile_id=request.profile.profile_id,
+            milestone_event=request.moment_type,
+            event_date=request.moment_date,
+            recommendations=recommendations,
+            generated_at=datetime.datetime.now().isoformat(),
+            provider=self.llm_client.provider_name
+        )
+
+
+    async def _get_categories(self, request: RecommendationRequest) -> CategoriesResponse:
+        """
+        Generates categories for gift/experience recommendations based on a profile
+        
+        Args:
+            request: The recommendation request
+            
+        Returns:
+            A categories response with a list of categories to be used in generating recommendations
+        """
         prompt = create_category_determination_prompt(request)
 
         # Generate categories from the LLM
@@ -129,7 +189,7 @@ class RecommendationService:
         return json_text
 
 
-    def _parse_recommendations(self, llm_text: str, expected_count: int) -> list[RecommendationItem]:
+    def _parse_recommendations(self, llm_text: str, expected_count: int, recommendation_type: str = 'general') -> list[Union[GeneralRecommendationItem, MomentRecommendationItem]]:
         """
         Parse the LLM response text into RecommendationItem objects.
         
@@ -139,7 +199,8 @@ class RecommendationService:
         Args:
             llm_text: The text response from the LLM
             expected_count: The expected number of recommendations
-            
+            recommendation_type: Either 'general' or 'moments'
+
         Returns:
             A list of RecommendationItem objects
         """
@@ -150,30 +211,60 @@ class RecommendationService:
 
             # Convert to RecommendationItem objects
             recommendations = []
+
             for item in recommendations_data[:expected_count]:
-                recommendations.append(
-                    RecommendationItem(
-                        title=item["title"],
-                        product=item["product"],
-                        category=item["category"],
-                        explanation=item["explanation"],
-                        store=item["store"],
-                        relevance_score=item.get("relevance_score", 0.5),
-                        metadata=item.get("metadata")
+                # Base fields that are common to both types
+                base_fields = {
+                    'title': item["title"],
+                    'product': item["product"],
+                    'explanation': item["explanation"],
+                    'store': item["store"],
+                    'relevance_score': item.get("relevance_score", 0.5),
+                    'metadata': item.get("metadata")
+                }
+
+                # Create type-specific recommendation
+                if recommendation_type == 'general':
+                    recommendation_item = GeneralRecommendationItem(
+                        **base_fields,
+                        category=item.get("category", "General")
                     )
-                )
+                elif recommendation_type == 'moments':
+                    recommendation_item = MomentRecommendationItem(
+                        **base_fields,
+                        gift_type=item.get("gift_type", "General Gift")
+                    )
+                else:
+                    raise ValueError(f"Unknown recommendation_type: {recommendation_type}")
+                recommendations.append(recommendation_item)
+
             return recommendations
         except (json.JSONDecodeError, KeyError, IndexError) as e:
             # Fallback: Create a default recommendation if parsing fails
-            return [
-                RecommendationItem(
-                    title=f"Recommendation {i+1}",
-                    # description="We were unable to parse the recommendation details.",
-                    product="",
-                    category="",
-                    explanation="",
-                    store="",
-                    relevance_score=0.01
-                ) 
-                for i in range(min(expected_count, 3))
-            ]
+            default_recommendations = []
+
+            for i in range(min(expected_count, 3)):
+                if recommendation_type == 'general':
+                    default_item = GeneralRecommendationItem(
+                        title=f"Recommendation {i+1}",
+                        product="",
+                        category="General",
+                        explanation="",
+                        store="",
+                        relevance_score=0.01
+                    )
+                elif recommendation_type == 'moments':
+                    default_item = MomentRecommendationItem(
+                        title=f"Recommendation {i+1}",
+                        product="",
+                        gift_type="Special Moment Gift",
+                        explanation="",
+                        store="",
+                        relevance_score=0.01
+                    )
+                else:
+                    raise ValueError(f"Unknown recommendation_type: {recommendation_type}")
+                    
+                default_recommendations.append(default_item)
+
+            return default_recommendations
