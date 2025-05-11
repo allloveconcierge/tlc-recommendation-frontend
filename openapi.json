@@ -1,0 +1,534 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "TLC Gift Recommendation API",
+        "description": "ML API for generating TLC recommendations for gifts and experiences.",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/health": {
+            "get": {
+                "summary": "Check Health",
+                "description": "Returns healthcheck",
+                "operationId": "check_health_health_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Healthcheck"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/recommend": {
+            "post": {
+                "tags": [
+                    "tlc_recommendations"
+                ],
+                "summary": "Get Recommendations",
+                "description": "Fetches general gift recommendations",
+                "operationId": "get_recommendations",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecommendationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecommendationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/recommend_for_moment": {
+            "post": {
+                "tags": [
+                    "tlc_recommendations"
+                ],
+                "summary": "Get Recommendations For Moments",
+                "description": "Fetches moment-specific gift recommendations",
+                "operationId": "get_recommendations_for_moments",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MomentsRecommendationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecommendationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/summarize": {
+            "post": {
+                "tags": [
+                    "tlc_recommendations"
+                ],
+                "summary": "Summarize User Profile",
+                "operationId": "summarize_user_profile",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SummarizationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SummarizationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Gender": {
+                "type": "string",
+                "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "prefer_not_to_say"
+                ],
+                "title": "Gender"
+            },
+            "GeneralRecommendationItem": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "product": {
+                        "type": "string",
+                        "title": "Product"
+                    },
+                    "explanation": {
+                        "type": "string",
+                        "title": "Explanation"
+                    },
+                    "store": {
+                        "type": "string",
+                        "title": "Store"
+                    },
+                    "relevance_score": {
+                        "type": "number",
+                        "maximum": 1.0,
+                        "minimum": 0.0,
+                        "title": "Relevance Score"
+                    },
+                    "metadata": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Metadata"
+                    },
+                    "category": {
+                        "type": "string",
+                        "title": "Category"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "title",
+                    "product",
+                    "explanation",
+                    "store",
+                    "relevance_score",
+                    "category"
+                ],
+                "title": "GeneralRecommendationItem"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "Healthcheck": {
+                "properties": {
+                    "isAlive": {
+                        "type": "boolean",
+                        "title": "Isalive"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "isAlive"
+                ],
+                "title": "Healthcheck",
+                "description": "Healthcheck response"
+            },
+            "MomentsRecommendationRequest": {
+                "properties": {
+                    "profile": {
+                        "$ref": "#/components/schemas/Profile",
+                        "description": "Information on Profile for Gift recommendation"
+                    },
+                    "moment_type": {
+                        "type": "string",
+                        "title": "Moment Type",
+                        "description": "Milestone event to make recommendations for"
+                    },
+                    "moment_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Moment Date",
+                        "description": "The date of the milestone event to make recommendations for"
+                    },
+                    "profile_interests": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Profile Interests",
+                        "description": "Profile interests for generating recommendations"
+                    },
+                    "context": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Context",
+                        "description": "Additional context for the recommendation"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "maximum": 20.0,
+                        "minimum": 1.0,
+                        "title": "Count",
+                        "description": "Number of recommendations to generate",
+                        "default": 10
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "profile",
+                    "moment_type",
+                    "moment_date",
+                    "profile_interests"
+                ],
+                "title": "MomentsRecommendationRequest"
+            },
+            "Profile": {
+                "properties": {
+                    "profile_id": {
+                        "type": "string",
+                        "title": "Profile Id",
+                        "description": "Unique identifier of a profile that recommendation will be made for"
+                    },
+                    "age": {
+                        "type": "integer",
+                        "exclusiveMinimum": 15.0,
+                        "title": "Age",
+                        "description": "Age of the person in a profile that recommendation will be made for"
+                    },
+                    "gender": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Gender"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Gender of the profile that recommendation will be made for"
+                    },
+                    "relationship": {
+                        "type": "string",
+                        "title": "Relationship",
+                        "description": "Relationship to the gift giver to the profile (i.e the gift recipient)"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "profile_id",
+                    "age",
+                    "gender",
+                    "relationship"
+                ],
+                "title": "Profile"
+            },
+            "RecommendationRequest": {
+                "properties": {
+                    "profile": {
+                        "$ref": "#/components/schemas/Profile",
+                        "description": "Information on Profile for Gift recommendation"
+                    },
+                    "location": {
+                        "type": "string",
+                        "title": "Location",
+                        "description": "The location of the profile (i.e. gift recipient) that recommendation will be made for"
+                    },
+                    "upcoming_event": {
+                        "type": "string",
+                        "title": "Upcoming Event",
+                        "description": "The upcoming event to make recommendations for"
+                    },
+                    "profile_interests": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Profile Interests",
+                        "description": "Profile interests for generating recommendations"
+                    },
+                    "context": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Context",
+                        "description": "Additional context for the recommendation"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "maximum": 20.0,
+                        "minimum": 1.0,
+                        "title": "Count",
+                        "description": "Number of recommendations to generate",
+                        "default": 10
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "profile",
+                    "location",
+                    "upcoming_event",
+                    "profile_interests"
+                ],
+                "title": "RecommendationRequest"
+            },
+            "RecommendationResponse": {
+                "properties": {
+                    "profile_id": {
+                        "type": "string",
+                        "title": "Profile Id"
+                    },
+                    "recommendations": {
+                        "items": {
+                            "$ref": "#/components/schemas/GeneralRecommendationItem"
+                        },
+                        "type": "array",
+                        "title": "Recommendations"
+                    },
+                    "generated_at": {
+                        "type": "string",
+                        "title": "Generated At"
+                    },
+                    "provider": {
+                        "type": "string",
+                        "title": "Provider"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "profile_id",
+                    "recommendations",
+                    "generated_at",
+                    "provider"
+                ],
+                "title": "RecommendationResponse"
+            },
+            "SummarizationRequest": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "title": "Text",
+                        "description": "Text to summarize"
+                    },
+                    "max_length": {
+                        "anyOf": [
+                            {
+                                "type": "integer",
+                                "maximum": 1000.0,
+                                "minimum": 50.0
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Max Length",
+                        "description": "Maximum length of summary in tokens",
+                        "default": 200
+                    },
+                    "format": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Format",
+                        "description": "Format of the summary (paragraph, bullet_points, key_points)",
+                        "default": "paragraph"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "title": "SummarizationRequest"
+            },
+            "SummarizationResponse": {
+                "properties": {
+                    "summary": {
+                        "type": "string",
+                        "title": "Summary"
+                    },
+                    "original_text_length": {
+                        "type": "integer",
+                        "title": "Original Text Length"
+                    },
+                    "summary_length": {
+                        "type": "integer",
+                        "title": "Summary Length"
+                    },
+                    "generated_at": {
+                        "type": "string",
+                        "title": "Generated At"
+                    },
+                    "provider": {
+                        "type": "string",
+                        "title": "Provider"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "summary",
+                    "original_text_length",
+                    "summary_length",
+                    "generated_at",
+                    "provider"
+                ],
+                "title": "SummarizationResponse"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}
