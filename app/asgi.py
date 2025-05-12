@@ -13,8 +13,8 @@ load_dotenv()
 def get_app() -> FastAPI:
     """method to set and get FASTAPI app"""
     fast_app = FastAPI(
-        title="Duplication Detection API",
-        version="1.0",
+        title="TLC Gift Recommendation API",
+        version="0.1.0",
         description="ML API for generating TLC recommendations for gifts and experiences.",
         debug=False,
     )

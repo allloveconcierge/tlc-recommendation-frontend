@@ -44,13 +44,18 @@ async def check_health():
     return responses.ORJSONResponse(heartbeat.model_dump())
 
 
-@router.post("/recommend", response_model=RecommendationResponse)
+@router.post(
+    "/recommend",
+    response_model=RecommendationResponse,
+    tags=["tlc_recommendations"],
+    operation_id="get_recommendations",
+)
 async def get_recommendations(
     request: Request,
     request_params: RecommendationRequest,
     service: RecommendationService = Depends(get_recommendation_service)
 ):
-    """Fetches gift recommendations"""
+    """Fetches general gift recommendations"""
 
     try:
         result = await service.generate_recommendations(request_params)
@@ -59,13 +64,18 @@ async def get_recommendations(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/recommend_for_moment", response_model=RecommendationResponse)
+@router.post(
+    "/recommend_for_moment",
+    response_model=RecommendationResponse,
+    tags=["tlc_recommendations"],
+    operation_id="get_recommendations_for_moments",
+)
 async def get_recommendations_for_moments(
     request: Request,
     request_params: MomentsRecommendationRequest,
     service: RecommendationService = Depends(get_recommendation_service)
 ):
-    """Fetches gift recommendations"""
+    """Fetches moment-specific gift recommendations"""
 
     try:
         result = await service.generate_recommendations_for_moments(request_params)
@@ -74,7 +84,12 @@ async def get_recommendations_for_moments(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/summarize", response_model=SummarizationResponse)
+@router.post(
+    "/summarize",
+    response_model=SummarizationResponse,
+    tags=["tlc_recommendations"],
+    operation_id="summarize_user_profile",
+)
 async def summarize_user_profile(
     request: Request,
     request_params: SummarizationRequest,
