@@ -51,12 +51,22 @@ def create_general_recommendation_prompt(request, categories):
 
     Note:
     - Suggested UK stores include (but are not limited to):
-      - thortful.com
-      - prezzybox.com
-      - funkypigeon.com
-      - notonthehighstreet.com
-      - virginexperiencedays.co.uk
+        - airbnb.co.uk/experiences
+        - thortful.com
+        - prezzybox.com
+        - funkypigeon.com
+        - notonthehighstreet.com
+        - virginexperiencedays.co.uk
+        - moonpig.com
+        - etsy.com (UK sellers)
+        - johnlewis.com
+        - selfridges.com
+        - lookfantastic.com
+        - firebox.com
+        - menkind.co.uk
+        - fortnumandmason.com
     - Feel encouraged to suggest other cool, unique UK-based stores that match the gift categories and recipient's interests
+    - Consider seasonal UK events (e.g., Chelsea Flower Show in May, Wimbledon in June/July, Edinburgh Festival in August)
 
     Present only the JSON response—no additional text or commentary.
     """
