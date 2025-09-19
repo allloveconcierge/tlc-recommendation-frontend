@@ -1,0 +1,13 @@
+{
+  "profile": {
+    "profile_id": "test_artist_001",
+    "age": 28,
+    "gender": "female",
+    "relationship": "sister"
+  },
+  "location": "Manchester, UK",
+  "upcoming_event": "birthday",
+  "profile_interests": ["art", "books", "coffee", "gardening"],
+  "count": 3,
+  "notes": "She loves watercolor painting and reading mystery novels"
+}

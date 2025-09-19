@@ -6,7 +6,6 @@ from starlette.requests import Request
 
 from app.api.schemas.output import Healthcheck
 from app.api.schemas.recommendations import (
-    MomentsRecommendationRequest,
     RecommendationRequest,
     RecommendationResponse,
 )
@@ -62,27 +61,6 @@ async def get_recommendations(
         return responses.ORJSONResponse(result.model_dump())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post(
-    "/recommend_for_moment",
-    response_model=RecommendationResponse,
-    tags=["tlc_recommendations"],
-    operation_id="get_recommendations_for_moments",
-)
-async def get_recommendations_for_moments(
-    request: Request,
-    request_params: MomentsRecommendationRequest,
-    service: RecommendationService = Depends(get_recommendation_service)
-):
-    """Fetches moment-specific gift recommendations"""
-
-    try:
-        result = await service.generate_recommendations_for_moments(request_params)
-        return responses.ORJSONResponse(result.model_dump())
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.post(
     "/summarize",

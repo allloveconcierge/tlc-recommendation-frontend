@@ -1,7 +1,8 @@
 from datetime import date, datetime
 from enum import Enum
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
+import json
 
 class Gender(str, Enum):
     MALE = "male"
@@ -18,23 +19,17 @@ class Profile(BaseModel):
 
 
 class RecommendationRequest(BaseModel):
-    profile: Profile = Field(..., description='Information on Profile for Gift recommendation')
+    profile: Profile
     location: str = Field(..., description="The location of the profile (i.e. gift recipient) that recommendation will be made for")
     upcoming_event: str = Field(..., description="The upcoming event to make recommendations for")
+    upcoming_event_date: Optional[str] = None
     profile_interests: List[str] = Field(
         ..., 
-        description="Profile interests for generating recommendations"
+        description="List of interests that the profile has"
     )
-    context: Optional[str] = Field(
-        None, 
-        description="Additional context for the recommendation"
-    )
-    count: int = Field(
-        10, 
-        description="Number of recommendations to generate",
-        ge=1,
-        le=20
-    )
+    count: Optional[int] = 3
+    notes: Optional[str] = None  # Free text notes about the loved one
+    web_search_enabled: Optional[bool] = True  # Whether to enable web search for enhanced data
 
 
 class BaseRecommendationItem(BaseModel):
@@ -44,59 +39,29 @@ class BaseRecommendationItem(BaseModel):
     store: str
     relevance_score: float = Field(..., ge=0.0, le=1.0)
     metadata: Optional[Dict[str, Any]] = None
+    product_url: Optional[str] = None  # Direct product link from web search
+    product_image: Optional[str] = None  # Product image URL from web search
+    product_cost: Optional[str] = None  # Product price if available from web search
+    store_logo: Optional[str] = None  # Store/website logo URL from web search
 
 
-class GeneralRecommendationItem(BaseRecommendationItem):
+class GeneralRecommendationItem(BaseModel):
+    title: str
+    product: str
+    type: str  # "product" or "experience"
     category: str
+    explanation: str
+    store: str
+    relevance_score: float
+    metadata: Dict[str, Any] = {}
+    product_url: Optional[str] = None
+    product_image: Optional[str] = None
+    product_cost: Optional[str] = None
+    store_logo: Optional[str] = None
 
-
-class MomentRecommendationItem(BaseRecommendationItem):
-    gift_type: str
-
-class CategoriesResponse(BaseModel):
-    categories: List[str]
-    provider: str
 class RecommendationResponse(BaseModel):
     profile_id: str
     recommendations: List[GeneralRecommendationItem]
-    generated_at: str
-    provider: str
-
-
-class MomentsRecommendationRequest(BaseModel):
-    profile: Profile = Field(..., description='Information on Profile for Gift recommendation')
-    moment_type: str = Field(..., description="Milestone event to make recommendations for")
-    moment_date: date = Field(..., description='The date of the milestone event to make recommendations for')
-    profile_interests: List[str] = Field(
-        ..., 
-        description="Profile interests for generating recommendations"
-    )
-    context: Optional[str] = Field(
-        None, 
-        description="Additional context for the recommendation"
-    )
-    count: int = Field(
-        10, 
-        description="Number of recommendations to generate",
-        ge=1,
-        le=20
-    )
-
-
-    @validator('moment_date')
-    def validate_future_date(cls, _date):
-        today = date.today()
-        if _date < today:
-            raise ValueError('Moment Date must be today or in the future')
-
-        return _date
-
-
-class MomentsRecommendationResponse(BaseModel):
-    profile_id: str
-    milestone_event: str
-    event_date: date
-    recommendations: List[MomentRecommendationItem]
     generated_at: str
     provider: str
 
