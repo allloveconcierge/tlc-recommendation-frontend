@@ -14,40 +14,21 @@ from app.core.services.llm.base import LLMClient
 from app.core.services.prompts.v1 import (
     create_recommendation_prompt,
 )
-from app.core.services.web_search import WebSearchService
-from app.core.services.keyword_extraction import KeywordExtractionService
 
 
 logger = logging.getLogger(__name__)
 class RecommendationService:
     """Service for generating recommendations using an LLM."""
     
-    def __init__(self, llm_client: LLMClient, web_search_service: WebSearchService = None):
+    def __init__(self, llm_client: LLMClient):
         self.llm_client = llm_client
-        self.web_search_service = web_search_service
-        self.keyword_extraction_service = KeywordExtractionService(llm_client)
     
     async def generate_recommendations(self, request: RecommendationRequest) -> RecommendationResponse:
         """Generate recommendations based on a profile's preferences."""
         start_time = time.time()
 
-        # Get web search results if service is available
-        search_results = []
-        if self.web_search_service:
-            try:
-                search_results = await self.web_search_service.search_gift_recommendations(
-                    interests=request.profile_interests,
-                    occasion=request.upcoming_event,
-                    age=request.profile.age,
-                    relationship=request.profile.relationship,
-                    count=request.count
-                )
-                logger.info(f"Retrieved {len(search_results)} web search results")
-            except Exception as e:
-                logger.warning(f"Web search failed, continuing without search results: {e}")
-
-        # Create a prompt for the LLM with search results
-        prompt = create_recommendation_prompt(request, search_results)
+        # Create a prompt for the LLM
+        prompt = create_recommendation_prompt(request)
         logger.info(f'Making call to LLM for recommendations')
         # logger.info(f'Making call to LLM for recommendations with prompt: {prompt}')
         llm_response = await self.llm_client.generate(

@@ -14,9 +14,8 @@ All picks must feel personal to the recipient and the occasion.
 - interests: {{ request.profile_interests }}
 - occasion: {{ request.upcoming_event }}
 - event_date: {{ request.upcoming_event_date if request.upcoming_event_date else null }}
-- notes: {{ request.context if request.context else null }}
+- notes: {{ request.notes if request.notes else null }}
 - exclusion_list (optional): product URLs or domains to avoid (may be empty)
-- pronoun (optional): recipient pronouns; fallback to “they/them” or the recipient’s name if not provided
 
 ---
 
@@ -41,7 +40,7 @@ All picks must feel personal to the recipient and the occasion.
 ---
 
 ## OUTPUT SCHEMA
-Return an array of objects with this shape:
+Return ONLY a JSON array of objects with this shape (do not wrap in any other object or field):
 [
   {
     "product": "string",
