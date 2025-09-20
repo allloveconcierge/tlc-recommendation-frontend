@@ -1,0 +1,127 @@
+{
+  "postman_collection": {
+    "info": {
+      "name": "TLC ML Service API Tests",
+      "description": "Test payloads for the TLC Gift Recommendation API",
+      "version": "1.0.0"
+    },
+    "base_url": "http://localhost:8000",
+    "endpoints": {
+      "health_check": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "description": "Check if the API is running"
+      },
+      "recommendations": {
+        "method": "POST",
+        "url": "{{base_url}}/recommend",
+        "description": "Get gift recommendations with websearch enabled"
+      }
+    },
+    "test_payloads": {
+      "basic_recommendation": {
+        "description": "Basic recommendation request for a 25-year-old female sister's birthday",
+        "payload": {
+          "profile": {
+            "profile_id": "test_profile_001",
+            "age": 25,
+            "gender": "female",
+            "relationship": "sister"
+          },
+          "location": "London, UK",
+          "upcoming_event": "Birthday",
+          "upcoming_event_date": "2024-10-15",
+          "profile_interests": ["technology", "music", "fashion"],
+          "count": 3,
+          "notes": "Loves gadgets and trendy accessories",
+          "web_search_enabled": true
+        }
+      },
+      "no_websearch": {
+        "description": "Recommendation request with websearch disabled",
+        "payload": {
+          "profile": {
+            "profile_id": "test_profile_002",
+            "age": 30,
+            "gender": "male",
+            "relationship": "brother"
+          },
+          "location": "Manchester, UK",
+          "upcoming_event": "Christmas",
+          "upcoming_event_date": "2024-12-25",
+          "profile_interests": ["sports", "gaming", "books"],
+          "count": 2,
+          "notes": "Loves football and video games",
+          "web_search_enabled": false
+        }
+      },
+      "artist_profile": {
+        "description": "Recommendation for an artistic person (from quick_test.json)",
+        "payload": {
+          "profile": {
+            "profile_id": "test_artist_001",
+            "age": 28,
+            "gender": "female",
+            "relationship": "sister"
+          },
+          "location": "Manchester, UK",
+          "upcoming_event": "birthday",
+          "profile_interests": ["art", "books", "coffee", "gardening"],
+          "count": 3,
+          "notes": "She loves watercolor painting and reading mystery novels",
+          "web_search_enabled": true
+        }
+      },
+      "minimal_request": {
+        "description": "Minimal request with only required fields",
+        "payload": {
+          "profile": {
+            "profile_id": "minimal_test",
+            "age": 35,
+            "gender": "other",
+            "relationship": "friend"
+          },
+          "location": "Birmingham, UK",
+          "upcoming_event": "Graduation",
+          "profile_interests": ["technology"]
+        }
+      },
+      "teen_profile": {
+        "description": "Recommendation for a teenager (age restrictions should apply)",
+        "payload": {
+          "profile": {
+            "profile_id": "teen_test",
+            "age": 16,
+            "gender": "male",
+            "relationship": "son"
+          },
+          "location": "Edinburgh, UK",
+          "upcoming_event": "Birthday",
+          "upcoming_event_date": "2024-11-20",
+          "profile_interests": ["gaming", "sports", "music"],
+          "count": 2,
+          "notes": "Loves video games and football",
+          "web_search_enabled": true
+        }
+      },
+      "urgent_event": {
+        "description": "Event happening soon (within 7 days) - should prefer fast delivery",
+        "payload": {
+          "profile": {
+            "profile_id": "urgent_test",
+            "age": 40,
+            "gender": "female",
+            "relationship": "mother"
+          },
+          "location": "Glasgow, UK",
+          "upcoming_event": "Anniversary",
+          "upcoming_event_date": "2024-09-25",
+          "profile_interests": ["gardening", "cooking", "books"],
+          "count": 2,
+          "notes": "Loves her garden and trying new recipes",
+          "web_search_enabled": true
+        }
+      }
+    }
+  }
+}

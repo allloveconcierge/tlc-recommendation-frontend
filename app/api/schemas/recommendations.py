@@ -1,8 +1,7 @@
-from datetime import date, datetime
+from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional, Dict, Any
-import json
+from pydantic import BaseModel, Field
+from typing import List, Optional
 
 class Gender(str, Enum):
     MALE = "male"
@@ -32,32 +31,16 @@ class RecommendationRequest(BaseModel):
     web_search_enabled: Optional[bool] = True  # Whether to enable web search for enhanced data
 
 
-class BaseRecommendationItem(BaseModel):
-    title: str
-    product: str
-    explanation: str
-    store: str
-    relevance_score: float = Field(..., ge=0.0, le=1.0)
-    metadata: Optional[Dict[str, Any]] = None
-    product_url: Optional[str] = None  # Direct product link from web search
-    product_image: Optional[str] = None  # Product image URL from web search
-    product_cost: Optional[str] = None  # Product price if available from web search
-    store_logo: Optional[str] = None  # Store/website logo URL from web search
-
-
 class GeneralRecommendationItem(BaseModel):
-    title: str
     product: str
     type: str  # "product" or "experience"
     category: str
     explanation: str
     store: str
     relevance_score: float
-    metadata: Dict[str, Any] = {}
     product_url: Optional[str] = None
     product_image: Optional[str] = None
     product_cost: Optional[str] = None
-    store_logo: Optional[str] = None
 
 class RecommendationResponse(BaseModel):
     profile_id: str

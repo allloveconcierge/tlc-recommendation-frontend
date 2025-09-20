@@ -4,16 +4,13 @@ import logging
 import time
 from typing import Union, List
 import re
+import os
+import asyncio
 
-from app.api.schemas.recommendations import (
-    GeneralRecommendationItem,
-    RecommendationRequest,
-    RecommendationResponse,
-)
+from app.api.schemas.recommendations import (GeneralRecommendationItem,RecommendationRequest, RecommendationResponse)
 from app.core.services.llm.base import LLMClient
-from app.core.services.prompts.v1 import (
-    create_recommendation_prompt,
-)
+from app.core.services.prompts.v1 import (create_recommendation_prompt)
+from app.core.services.websearch import enrich_with_exa_async
 
 
 logger = logging.getLogger(__name__)
@@ -26,9 +23,10 @@ class RecommendationService:
     async def generate_recommendations(self, request: RecommendationRequest) -> RecommendationResponse:
         """Generate recommendations based on a profile's preferences."""
         start_time = time.time()
-
         # Create a prompt for the LLM
-        prompt = create_recommendation_prompt(request)
+        # Force direct mode in prompt to keep parser stable; we will enrich with web search separately if enabled
+        prompt_request = request.model_copy(update={"web_search_enabled": False})
+        prompt = create_recommendation_prompt(prompt_request)
         logger.info(f'Making call to LLM for recommendations')
         # logger.info(f'Making call to LLM for recommendations with prompt: {prompt}')
         llm_response = await self.llm_client.generate(
@@ -39,13 +37,27 @@ class RecommendationService:
 
         # Parse the LLM response into recommendation items
         recommendations = self._parse_recommendations(llm_response["text"], request.count)
+
+        # Enrich with enhanced web search (Exa) if enabled
+        if getattr(request, "web_search_enabled", False):
+            try:
+                t0 = time.perf_counter()
+                recommendations = await asyncio.wait_for(
+                    enrich_with_exa_async(recommendations),
+                    timeout=8
+                )
+                logger.info(f"Exa enrichment latency: {time.perf_counter() - t0:.3f}s")
+            except asyncio.TimeoutError:
+                logger.warning("Exa enrichment timed out; using base recommendations.")
+            except Exception as ex:
+                logger.warning(f"Exa enrichment failed; using base recommendations. Error: {ex}")
+
         end_time = time.time()
         execution_time = end_time - start_time
         logger.info(f"Recommendation took {execution_time:.6f} seconds to execute end-to-end.")
 
         # logger.info(f"Recommendations: {recommendations}")
         
-        # return [] 
         return RecommendationResponse(
             profile_id=request.profile.profile_id,
             recommendations=recommendations,
@@ -95,39 +107,15 @@ class RecommendationService:
             for item in recommendations_data[:expected_count]:
                 # Create general recommendation item
                 recommendation_item = GeneralRecommendationItem(
-                    title=item.get("product", "Unknown Product"),
                     product=item["product"],
                     type=item["type"],
                     category=item["category"],
                     explanation=item["explanation"],
                     store=item["store"],
                     relevance_score=item.get("relevance_score", 0.5),
-                    metadata={
-                        "store_name": item.get("store_name", "Unknown Store"),
-                        "store_country": item.get("store_country", "UK"),
-                        "product_link": item.get("product_link", "https://example.com"),
-                        "image_url": item.get("image_url"),
-                        "price": item.get("price", {
-                            "min_gbp": None,
-                            "max_gbp": None,
-                            "display": "Price not available"
-                        }),
-                        "shipping": item.get("shipping", {
-                            "lead_time_days": None,
-                            "delivery_method": None,
-                            "ships_to": ["UK"]
-                        }),
-                        "personalisation_available": item.get("personalisation_available", False),
-                        "matching_signals": item.get("matching_signals", []),
-                        "suitability_flags": item.get("suitability_flags", ["none"]),
-                        "location": item.get("metadata", {}).get("location"),
-                        "duration": item.get("metadata", {}).get("duration"),
-                        "voucher_validity": item.get("metadata", {}).get("voucher_validity")
-                    },
-                    product_url=item.get("product_link", "https://example.com"),
+                    product_url=item.get("product_link") or f"https://{item.get('store', 'example.com')}",
                     product_image=item.get("image_url"),
-                    product_cost=item.get("price", {}).get("display", "Price not available"),
-                    store_logo=None
+                    product_cost=item.get("price", {}).get("display", "Price not available")
                 )
                 recommendations.append(recommendation_item)
             return recommendations
@@ -135,3 +123,4 @@ class RecommendationService:
             # Fallback: Create a default recommendation if parsing fails
             logger.error(f"Failed to create recommendation items: {e}")
             return []
+            

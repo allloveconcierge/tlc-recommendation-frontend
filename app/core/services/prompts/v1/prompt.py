@@ -8,11 +8,11 @@ from app.api.schemas.recommendations import RecommendationRequest
 
 template_dir = Path(__file__).parent
 env = Environment(loader=FileSystemLoader(template_dir))
-template = env.get_template('recommendation_prompt.j2')
+template = env.get_template('recommendation_prompt_v2.j2')
 
 def create_recommendation_prompt(request):
     """Loads and renders the general recommendation prompt"""
-    template = env.get_template('recommendation_prompt.j2')
+    template = env.get_template('recommendation_prompt_v2.j2')
     return template.render(
         request=request
     )

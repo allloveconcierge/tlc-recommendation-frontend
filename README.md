@@ -1,6 +1,6 @@
 # TLC ML Service
 
-A FastAPI service for generating gift recommendations using LLMs.
+A FastAPI service for generating personalized gift recommendations using LLMs with real-time web search enrichment.
 
 ## Quick Start
 
@@ -37,15 +37,23 @@ The API will start on `http://localhost:8000`
 ### API Endpoints
 
 - `GET /health` - Health check
-- `POST /recommend` - Get gift recommendations
+- `POST /recommend` - Get personalized gift recommendations with optional web search enrichment
 - `POST /summarize` - Summarize user profile
+
+### Features
+
+- **LLM-powered recommendations** using Gemini, Claude, or OpenAI
+- **Real-time web search** via Exa API for product URLs and details
+- **UK-focused** gift suggestions from local retailers
+- **Personalized** based on recipient's interests, age, and occasion
 
 ### Environment Variables
 
-Set your LLM API keys:
-- `ANTHROPIC_API_KEY` - For Claude models
-- `OPENAI_API_KEY` - For OpenAI models
-- `GOOGLE_API_KEY` - For Gemini models
+Set your API keys:
+- `GOOGLE_API_KEY` - For Gemini LLM (required)
+- `EXA_API_KEY` - For web search enrichment (optional)
+- `ANTHROPIC_API_KEY` - For Claude models (optional)
+- `OPENAI_API_KEY` - For OpenAI models (optional)
 
 ### Testing
 
