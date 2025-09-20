@@ -57,10 +57,35 @@ Set your API keys:
 
 ### Testing
 
+**Unit Tests:**
 ```bash
 # Run tests
 poetry run pytest
 
 # Or with pip
 pytest
+```
+
+**API Testing with Postman:**
+1. Start the service: `python run.py`
+2. Import the test collection: `TLC_ML_Service_Tests.postman_collection.json`
+3. Test endpoints:
+   - `GET http://localhost:8000/health` - Health check
+   - `POST http://localhost:8000/recommend` - Get recommendations
+
+**Sample Request:**
+```json
+{
+  "profile": {
+    "profile_id": "test_001",
+    "age": 25,
+    "gender": "female",
+    "relationship": "sister"
+  },
+  "location": "London, UK",
+  "upcoming_event": "Birthday",
+  "profile_interests": ["technology", "music"],
+  "count": 3,
+  "web_search_enabled": true
+}
 ```
