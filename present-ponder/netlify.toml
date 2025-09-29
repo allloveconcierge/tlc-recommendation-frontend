@@ -1,6 +1,7 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  base = "present-ponder"
 
 [[redirects]]
   from = "/*"
@@ -9,6 +10,11 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_VERSION = "10"
+  # Disable Python detection
+  PYTHON_VERSION = ""
+  # Force Node.js environment
+  NIXPACKS_NO_DEFAULT_CACHE = "true"
 
 # Environment variables (set these in Netlify dashboard)
 # VITE_API_BASE_URL = "https://your-backend-url.railway.app"
