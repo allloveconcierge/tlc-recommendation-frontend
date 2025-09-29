@@ -8,6 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.event_handlers import start_app_handler, stop_app_handler
 from app.api.controllers.routes import router
 
+# Import frontend serving for Replit deployment
+try:
+    from serve_frontend import setup_frontend_serving
+    FRONTEND_SERVING_AVAILABLE = True
+except ImportError:
+    FRONTEND_SERVING_AVAILABLE = False
+
 load_dotenv()
 
 def get_app() -> FastAPI:
@@ -21,10 +28,15 @@ def get_app() -> FastAPI:
     fast_app.include_router(router=router)
     fast_app.add_event_handler("startup", start_app_handler(fast_app))
     fast_app.add_event_handler("shutdown", stop_app_handler(fast_app))
+    
+    # Setup frontend serving for Replit deployment
+    if FRONTEND_SERVING_AVAILABLE and os.environ.get("SERVE_FRONTEND", "false").lower() == "true":
+        setup_frontend_serving(fast_app)
     # Add CORS middleware
+    allowed_origins = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
     fast_app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Update this for production
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
