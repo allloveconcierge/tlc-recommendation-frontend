@@ -14,6 +14,8 @@ class ClaudeClient(LLMClient):
     def __init__(self, settings: LLMSettings):
         self.api_key = settings.claude_api_key
         self.model = settings.claude_model
+        if not self.api_key:
+            raise ValueError("Claude API key is required but not provided")
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.request_timeout = settings.request_timeout
         

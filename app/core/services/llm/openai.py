@@ -12,6 +12,8 @@ class OpenAIClient(LLMClient):
     def __init__(self, settings: LLMSettings):
         self.api_key = settings.openai_api_key
         self.model = settings.openai_model
+        if not self.api_key:
+            raise ValueError("OpenAI API key is required but not provided")
         self.client = openai.OpenAI(api_key=self.api_key)
         self.request_timeout = settings.request_timeout
         

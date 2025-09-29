@@ -11,6 +11,8 @@ class GemmaClient(LLMClient):
     def __init__(self, settings: LLMSettings):
         self.api_key = settings.gemma_api_key
         self.model = settings.gemma_model
+        if not self.api_key:
+            raise ValueError("Gemma API key is required but not provided")
         self.base_url = "https://api.example.com/gemma"  # Replace with actual Gemma API URL
         self.request_timeout = settings.request_timeout
         

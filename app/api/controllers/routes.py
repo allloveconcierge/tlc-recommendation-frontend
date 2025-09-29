@@ -23,14 +23,14 @@ router = APIRouter()
 # Create a semaphore with a limit of 50
 semaphore = Semaphore(os.environ.get("CONCURRENCY", 50))
 
-llm_settings = get_settings()
-
-# Dependency to get LLM client
+# Dependency to get LLM client - lazy initialization to avoid startup failures
 def get_recommendation_service():
+    llm_settings = get_settings()
     llm_client = get_llm_client(llm_settings)
     return RecommendationService(llm_client)
 
 def get_summarization_service():
+    llm_settings = get_settings()
     llm_client = get_llm_client(llm_settings)
     return SummarizationService(llm_client)
 

@@ -12,6 +12,8 @@ class GeminiClient(LLMClient):
     def __init__(self, settings: LLMSettings):
         self.api_key = settings.google_api_key
         self.model = settings.gemini_model
+        if not self.api_key:
+            raise ValueError("Google API key is required but not provided")
         genai.configure(api_key=self.api_key)
         self.request_timeout = settings.request_timeout
         
