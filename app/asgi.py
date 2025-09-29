@@ -25,6 +25,30 @@ def get_app() -> FastAPI:
         description="ML API for generating TLC recommendations for gifts and experiences.",
         debug=False,
     )
+    
+    # Add CORS middleware FIRST, before routes
+    allowed_origins_str = os.environ.get("ALLOWED_ORIGINS", "*")
+    
+    # Handle CORS origins - allow all for now to fix the issue
+    if allowed_origins_str == "*":
+        cors_origins = ["*"]
+    else:
+        cors_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
+        # Always include the frontend domain
+        if "https://tlc-recommendation-frontend.netlify.app" not in cors_origins:
+            cors_origins.append("https://tlc-recommendation-frontend.netlify.app")
+    
+    print(f"CORS Origins: {cors_origins}")  # Debug logging
+    
+    fast_app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+    )
+    
+    # Add routes after CORS middleware
     fast_app.include_router(router=router)
     fast_app.add_event_handler("startup", start_app_handler(fast_app))
     fast_app.add_event_handler("shutdown", stop_app_handler(fast_app))
@@ -32,21 +56,7 @@ def get_app() -> FastAPI:
     # Setup frontend serving for Replit deployment
     if FRONTEND_SERVING_AVAILABLE and os.environ.get("SERVE_FRONTEND", "false").lower() == "true":
         setup_frontend_serving(fast_app)
-    # Add CORS middleware
-    allowed_origins = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
     
-    # Ensure we always allow common development and deployment origins
-    default_origins = ["*"]  # Allow all origins for now
-    if allowed_origins != ["*"]:
-        default_origins = allowed_origins
-    
-    fast_app.add_middleware(
-        CORSMiddleware,
-        allow_origins=default_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
     return fast_app
 
 
