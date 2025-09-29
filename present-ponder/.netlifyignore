@@ -23,9 +23,10 @@ coverage.xml
 .pytest_cache
 .hypothesis
 
-# Ignore backend files
+# Ignore ALL backend files and directories
 ../app/
 ../tests/
+../experimentation/
 ../*.py
 ../requirements*.txt
 ../pyproject.toml
@@ -50,3 +51,12 @@ coverage.xml
 ../build_replit.sh
 ../lint.sh
 ../test.sh
+
+# Additional Python detection files
+../.python-version
+../mise.toml
+../.mise.toml
+../Pipfile
+../Pipfile.lock
+../setup.py
+../setup.cfg
