@@ -34,9 +34,15 @@ def get_app() -> FastAPI:
         setup_frontend_serving(fast_app)
     # Add CORS middleware
     allowed_origins = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+    
+    # Ensure we always allow common development and deployment origins
+    default_origins = ["*"]  # Allow all origins for now
+    if allowed_origins != ["*"]:
+        default_origins = allowed_origins
+    
     fast_app.add_middleware(
         CORSMiddleware,
-        allow_origins=allowed_origins,
+        allow_origins=default_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
