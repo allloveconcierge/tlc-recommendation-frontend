@@ -11,10 +11,12 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "10"
-  # Disable Python detection
+  # Disable Python detection completely
   PYTHON_VERSION = ""
-  # Force Node.js environment
+  # Force Node.js environment only
   NIXPACKS_NO_DEFAULT_CACHE = "true"
+  # Disable mise Python detection
+  MISE_SETTINGS_PYTHON_COMPILE = "false"
 
 # Environment variables (set these in Netlify dashboard)
 # VITE_API_BASE_URL = "https://your-backend-url.railway.app"
