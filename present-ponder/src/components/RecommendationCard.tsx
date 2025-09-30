@@ -1,6 +1,4 @@
-import { Gift, ExternalLink } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface Recommendation {
   id: string;
@@ -15,42 +13,49 @@ interface RecommendationCardProps {
   recommendation: Recommendation;
 }
 
+// Extract domain from URL for display
+const extractDomain = (url: string): string => {
+  try {
+    const domain = new URL(url).hostname;
+    return domain.replace('www.', '');
+  } catch {
+    return 'Website';
+  }
+};
+
 export const RecommendationCard = ({ recommendation }: RecommendationCardProps) => {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1 flex-1">
-            <CardTitle className="text-lg leading-tight">{recommendation.name}</CardTitle>
-            <CardDescription className="text-xs font-medium text-primary">
-              {recommendation.category}
-            </CardDescription>
+    <Card className="border border-gray-200 bg-white hover:shadow-sm transition-shadow duration-200">
+      <CardHeader className="pb-4">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500 bg-gray-50 px-2 py-1 rounded text-center">
+              1/20
+            </span>
           </div>
-          <div className="flex-shrink-0 p-2 rounded-full bg-primary/10 text-primary">
-            <Gift className="h-4 w-4" />
-          </div>
+          <CardTitle className="text-xl font-bold text-black leading-tight">
+            {recommendation.name}
+          </CardTitle>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {recommendation.description}
+          </p>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {recommendation.description}
-        </p>
-        <div className="flex items-center justify-between pt-2">
-          <span className="text-lg font-bold text-foreground">
-            {recommendation.price}
-          </span>
-          {recommendation.link && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary hover:text-primary hover:bg-primary/10"
+      <CardContent className="pt-0">
+        {recommendation.link && (
+          <div className="space-y-2">
+            <p className="text-sm text-gray-700 font-medium">
+              Suggested site to search
+            </p>
+            <button
               onClick={() => window.open(recommendation.link, "_blank")}
+              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black transition-colors bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-full border border-gray-200"
             >
-              View
-              <ExternalLink className="ml-1 h-3 w-3" />
-            </Button>
-          )}
-        </div>
+              <div className="w-4 h-4 rounded-full bg-gray-400"></div>
+              {extractDomain(recommendation.link)}
+            </button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
