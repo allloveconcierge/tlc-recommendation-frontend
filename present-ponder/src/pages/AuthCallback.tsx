@@ -22,7 +22,7 @@ export const AuthCallback = () => {
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
 
-        if (type === 'signup' && accessToken && refreshToken) {
+        if ((type === 'signup' || type === 'recovery') && accessToken && refreshToken) {
           // Set the session with the tokens
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -33,17 +33,25 @@ export const AuthCallback = () => {
             setSuccess(false);
             setMessage(`Verification failed: ${error.message}`);
             toast({
-              title: "Email verification failed",
+              title: type === 'recovery' ? "Password reset failed" : "Email verification failed",
               description: error.message,
               variant: "destructive",
             });
           } else if (data.user) {
             setSuccess(true);
-            setMessage("Email verified successfully! Your account is now active.");
-            toast({
-              title: "Email verified!",
-              description: "Your account has been successfully verified.",
-            });
+            if (type === 'recovery') {
+              setMessage("Password reset successful! You can now update your password in your account settings.");
+              toast({
+                title: "Password reset successful!",
+                description: "You are now signed in and can update your password.",
+              });
+            } else {
+              setMessage("Email verified successfully! Your account is now active.");
+              toast({
+                title: "Email verified!",
+                description: "Your account has been successfully verified.",
+              });
+            }
             
             // Redirect to main app after a short delay
             setTimeout(() => {

@@ -24,6 +24,8 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [passcodeVerified, setPasscodeVerified] = useState(false);
   const [showResendEmail, setShowResendEmail] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const { toast } = useToast();
@@ -237,6 +239,50 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const emailValidation = validateEmail(forgotPasswordEmail);
+    if (emailValidation) {
+      toast({
+        title: "Please enter a valid email",
+        description: emailValidation,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      });
+
+      if (error) {
+        toast({
+          title: "Password reset failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password reset email sent!",
+          description: "Check your email for a link to reset your password.",
+        });
+        setShowForgotPassword(false);
+        setForgotPasswordEmail("");
+      }
+    } catch (error) {
+      toast({
+        title: "Password reset failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGuestMode = () => {
     onAuthSuccess();
   };
@@ -355,6 +401,17 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In
                   </Button>
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    className="text-sm text-muted-foreground hover:text-primary"
+                    onClick={() => {
+                      setShowForgotPassword(true);
+                      setForgotPasswordEmail(email);
+                    }}
+                  >
+                    Forgot your password?
+                  </Button>
                 </CardFooter>
               </form>
             </Card>
@@ -453,6 +510,53 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
                 Resend Confirmation Email
               </Button>
             </CardFooter>
+          </Card>
+        )}
+
+        {/* Forgot Password Section */}
+        {showForgotPassword && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Mail className="h-5 w-5 text-primary" />
+                <CardTitle>Reset Password</CardTitle>
+              </div>
+              <CardDescription>
+                Enter your email address and we'll send you a link to reset your password
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleForgotPassword}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="forgot-email">Email Address</Label>
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-2">
+                <Button type="submit" disabled={isLoading} className="w-full">
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Send Reset Link
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail("");
+                  }}
+                  className="w-full"
+                >
+                  Back to Sign In
+                </Button>
+              </CardFooter>
+            </form>
           </Card>
         )}
 
