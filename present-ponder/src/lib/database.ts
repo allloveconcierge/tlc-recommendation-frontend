@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 // Types for our gift profiles and recommendations
 export interface GiftProfile {
@@ -39,6 +39,11 @@ export interface RecommendationSet {
 export class DatabaseService {
   // Gift Profiles
   static async getGiftProfiles(): Promise<GiftProfile[]> {
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, returning empty profiles');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('gift_profiles')
       .select('*')
@@ -104,6 +109,11 @@ export class DatabaseService {
 
   // Recommendations
   static async getRecommendations(profileId?: string): Promise<RecommendationSet[]> {
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, returning empty recommendations');
+      return [];
+    }
+
     let query = supabase
       .from('recommendations')
       .select('*')
@@ -168,6 +178,11 @@ export class DatabaseService {
 
   // User accumulated notes
   static async getAccumulatedNotes(): Promise<string> {
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, returning empty accumulated notes');
+      return '';
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return '';
 

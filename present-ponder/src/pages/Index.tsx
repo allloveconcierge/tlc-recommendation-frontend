@@ -6,8 +6,9 @@ import { OccasionForm } from "@/components/OccasionForm";
 import { RecommendationsList, RecommendationSet } from "@/components/RecommendationsList";
 import { Recommendation } from "@/components/RecommendationCard";
 import { Button } from "@/components/ui/button";
-import { Gift, UserCircle, Pencil, Menu, X } from "lucide-react";
+import { Gift, UserCircle, Pencil, Menu, X, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { DatabaseService, GiftProfile, RecommendationSet as DBRecommendationSet } from "@/lib/database";
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:8000";
@@ -24,6 +25,7 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     loadData();
@@ -295,6 +297,26 @@ const Index = () => {
               <Menu className="h-4 w-4" />
             </Button>
             <h1 className="text-lg font-semibold text-foreground">TLC</h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {user.email}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={signOut}
+                  className="p-2 h-8 w-8"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <span className="text-sm text-muted-foreground">Guest Mode</span>
+            )}
           </div>
         </div>
       </header>
