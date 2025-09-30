@@ -1,5 +1,6 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "tlc-gift-recommendations",
+  "description": "AI-powered gift recommendation platform - The operating system for relationships that matter",
   "private": true,
   "version": "0.0.0",
   "type": "module",
