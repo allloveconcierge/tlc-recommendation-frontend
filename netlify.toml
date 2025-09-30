@@ -11,16 +11,8 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "10"
-  # Explicitly disable Python detection
-  PYTHON_VERSION = ""
-  DISABLE_PYTHON = "true"
-  SKIP_PYTHON = "true"
-  NO_PYTHON = "true"
-  # Force Node.js environment only
-  NIXPACKS_NO_DEFAULT_CACHE = "true"
-  MISE_SETTINGS_PYTHON_COMPILE = "false"
 
-# Ignore all Python files and backend directories
+# Only build when frontend changes
 [build.ignore]
   command = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- present-ponder/"
 
