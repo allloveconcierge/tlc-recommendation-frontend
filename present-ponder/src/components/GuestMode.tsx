@@ -6,10 +6,11 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
-import { Loader2, Gift, Heart, Star, UserCircle, LogIn } from "lucide-react";
+import { Loader2, Gift, Heart, Star, UserCircle, LogIn, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { RecommendationCard, Recommendation } from "./RecommendationCard";
 import { useNavigate } from "react-router-dom";
+import { GuestDataManager } from "@/lib/guestDataManager";
 
 const POPULAR_INTERESTS = [
   "Reading", "Cooking", "Gaming", "Music", "Sports", "Art", "Technology", 
@@ -28,7 +29,11 @@ const RELATIONSHIPS = [
   "Acquaintance", "Boss", "Teacher", "Neighbor", "Other"
 ];
 
-export default function GuestMode() {
+interface GuestModeProps {
+  onExitGuest?: () => void;
+}
+
+export default function GuestMode({ onExitGuest }: GuestModeProps) {
   const navigate = useNavigate();
   
   // Profile fields
@@ -67,7 +72,7 @@ export default function GuestMode() {
   };
 
   const handleSubmit = async () => {
-    if (!recipientName || !age || selectedInterests.length === 0 || !relationship || !occasion || !budget) {
+    if (!recipientName || !age || selectedInterests.length === 0 || !relationship || !occasion) {
       setError("Please fill in all required fields");
       return;
     }
@@ -129,6 +134,19 @@ export default function GuestMode() {
         link: r.product_url || (typeof r.store === "string" && r.store?.startsWith("http") ? r.store : undefined)
       }));
       setRecommendations(formattedRecommendations);
+
+      // Save guest data to localStorage for potential future use
+      GuestDataManager.saveGuestData({
+        recipientName,
+        age,
+        selectedInterests,
+        relationship,
+        occasion,
+        customOccasion,
+        budget,
+        additionalNotes,
+        recommendations: formattedRecommendations
+      });
     } catch (err) {
       console.error('Error getting recommendations:', err);
       setError('Failed to get recommendations. Please try again.');
@@ -159,7 +177,7 @@ export default function GuestMode() {
             Gift Recommendations
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground px-2 sm:px-0">
-            Perfect gifts for {recipientName} • {occasion} • {budget}
+            Perfect gifts for {recipientName} • {occasion}{budget ? ` • ${budget}` : ''}
           </p>
           <Button variant="outline" onClick={resetForm} className="mt-4" size="sm">
             <Gift className="w-4 h-4 mr-2" />
@@ -190,7 +208,12 @@ export default function GuestMode() {
             <div className="flex flex-col gap-3 sm:gap-4 max-w-md mx-auto">
               <Button 
                 size="lg"
-                onClick={() => navigate("/")}
+                onClick={() => {
+                  if (onExitGuest) {
+                    onExitGuest();
+                  }
+                  navigate("/");
+                }}
                 className="w-full h-12 text-sm sm:text-base"
               >
                 <UserCircle className="w-4 h-4 mr-2" />
@@ -199,7 +222,12 @@ export default function GuestMode() {
               <Button 
                 variant="outline" 
                 size="lg"
-                onClick={() => navigate("/")}
+                onClick={() => {
+                  if (onExitGuest) {
+                    onExitGuest();
+                  }
+                  navigate("/");
+                }}
                 className="w-full h-12 text-sm sm:text-base"
               >
                 <LogIn className="w-4 h-4 mr-2" />
@@ -214,6 +242,23 @@ export default function GuestMode() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-6">
+      {/* Header with back button */}
+      <div className="flex items-center gap-4 mb-6">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => {
+            if (onExitGuest) {
+              onExitGuest();
+            }
+            navigate("/");
+          }}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Sign In
+        </Button>
+      </div>
+
       <div className="text-center space-y-2 mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
           Guest Mode
@@ -367,7 +412,7 @@ export default function GuestMode() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="budget">Budget *</Label>
+              <Label htmlFor="budget">Budget (Optional)</Label>
               <Select value={budget} onValueChange={setBudget}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select budget range" />

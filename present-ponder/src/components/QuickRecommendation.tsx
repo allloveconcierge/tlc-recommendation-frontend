@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { RecommendationCard, Recommendation } from "./RecommendationCard";
 import { useToast } from "@/hooks/use-toast";
 import { DatabaseService } from "@/lib/database";
+import { GuestDataManager } from "@/lib/guestDataManager";
 
 const POPULAR_INTERESTS = [
   "Reading", "Cooking", "Gaming", "Music", "Sports", "Art", "Technology", 
@@ -74,7 +75,7 @@ export default function QuickRecommendation({ onBack, onProfileSaved }: QuickRec
   };
 
   const handleSubmit = async () => {
-    if (!recipientName || !age || selectedInterests.length === 0 || !relationship || !occasion || !budget) {
+    if (!recipientName || !age || selectedInterests.length === 0 || !relationship || !occasion) {
       setError("Please fill in all required fields");
       return;
     }
@@ -126,6 +127,19 @@ export default function QuickRecommendation({ onBack, onProfileSaved }: QuickRec
         link: r.product_url || (typeof r.store === "string" && r.store?.startsWith("http") ? r.store : undefined)
       }));
       setRecommendations(formattedRecommendations);
+
+      // Also save to localStorage as backup (in case user wants to sign up later)
+      GuestDataManager.saveGuestData({
+        recipientName,
+        age,
+        selectedInterests,
+        relationship,
+        occasion,
+        customOccasion,
+        budget,
+        additionalNotes,
+        recommendations: formattedRecommendations
+      });
     } catch (err) {
       console.error('Error getting recommendations:', err);
       setError('Failed to get recommendations. Please try again.');
@@ -161,6 +175,9 @@ export default function QuickRecommendation({ onBack, onProfileSaved }: QuickRec
         title: "Profile and recommendations saved!",
         description: `${recipientName}'s profile and recommendations have been saved to your account.`,
       });
+
+      // Clear guest data since we've manually saved it
+      GuestDataManager.clearGuestData();
 
       // Notify parent to refresh the profiles list
       if (onProfileSaved) {
@@ -208,7 +225,7 @@ export default function QuickRecommendation({ onBack, onProfileSaved }: QuickRec
             Gift Recommendations
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground px-2 sm:px-0">
-            Perfect gifts for {recipientName} • {occasion} • {budget}
+            Perfect gifts for {recipientName} • {occasion}{budget ? ` • ${budget}` : ''}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
             <Button variant="outline" onClick={resetForm} size="sm">
@@ -410,7 +427,7 @@ export default function QuickRecommendation({ onBack, onProfileSaved }: QuickRec
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="budget">Budget *</Label>
+              <Label htmlFor="budget">Budget (Optional)</Label>
               <Select value={budget} onValueChange={setBudget}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select budget range" />
