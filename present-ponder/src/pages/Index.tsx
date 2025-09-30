@@ -5,8 +5,9 @@ import { ProfileNotes } from "@/components/ProfileNotes";
 import { OccasionForm } from "@/components/OccasionForm";
 import { RecommendationsList, RecommendationSet } from "@/components/RecommendationsList";
 import { Recommendation } from "@/components/RecommendationCard";
+import QuickRecommendation from "@/components/QuickRecommendation";
 import { Button } from "@/components/ui/button";
-import { Gift, UserCircle, Pencil, Menu, X, LogOut } from "lucide-react";
+import { Gift, UserCircle, Pencil, Menu, X, LogOut, Plus, Zap, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +21,7 @@ const Index = () => {
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [profileView, setProfileView] = useState<"get-gift" | "enrich-profile">("get-gift");
+  const [mainView, setMainView] = useState<"welcome" | "quick-recommendation" | "manage-profiles">("welcome");
   const [accumulatedNotes, setAccumulatedNotes] = useState<string>("");
   const [currentRecommendations, setCurrentRecommendations] = useState<Recommendation[]>([]);
   const [history, setHistory] = useState<RecommendationSet[]>([]);
@@ -37,6 +39,7 @@ const Index = () => {
       setSelectedProfileId(null);
       setEditingProfileId(null);
       setIsCreatingProfile(false);
+      setMainView("welcome");
       setCurrentRecommendations([]);
       setHistory([]);
       setAccumulatedNotes("");
@@ -112,6 +115,7 @@ const Index = () => {
 
         setEditingProfileId(null);
         setSelectedProfileId(editingProfileId);
+        setMainView("manage-profiles");
         
         toast({
           title: "Profile updated!",
@@ -134,6 +138,7 @@ const Index = () => {
 
         setIsCreatingProfile(false);
         setSelectedProfileId(newProfile.id);
+        setMainView("manage-profiles");
         
         toast({
           title: "Profile saved!",
@@ -360,18 +365,21 @@ const Index = () => {
                   onSelectProfile={(id) => {
                     setSelectedProfileId(id);
                     setProfileView("get-gift");
+                    setMainView("manage-profiles");
                     setSidebarOpen(false);
                   }}
                   onEditProfile={(id) => {
                     setEditingProfileId(id);
                     setIsCreatingProfile(false);
                     setSelectedProfileId(null);
+                    setMainView("manage-profiles");
                     setSidebarOpen(false);
                   }}
                   onNewProfile={() => {
                     setIsCreatingProfile(true);
                     setEditingProfileId(null);
                     setSelectedProfileId(null);
+                    setMainView("manage-profiles");
                     setSidebarOpen(false);
                   }}
                 />
@@ -383,7 +391,14 @@ const Index = () => {
         {/* Main Content */}
         <div className="flex-1 p-6 overflow-auto">
           <div className="max-w-4xl mx-auto">
-            {isCreatingProfile || editingProfileId ? (
+            {mainView === "quick-recommendation" ? (
+              <QuickRecommendation 
+                onBack={() => setMainView("welcome")} 
+                onProfileSaved={loadData}
+              />
+            ) : mainView === "manage-profiles" || isCreatingProfile || editingProfileId || selectedProfile ? (
+              <>
+                {isCreatingProfile || editingProfileId ? (
               <div className="bg-card rounded-lg border p-6">
                 <ProfileForm
                   profile={editingProfile}
@@ -391,12 +406,27 @@ const Index = () => {
                   onCancel={() => {
                     setIsCreatingProfile(false);
                     setEditingProfileId(null);
+                    setMainView("welcome");
                   }}
                 />
               </div>
             ) : selectedProfile ? (
               <div className="space-y-6">
-                {/* Profile Header */}
+                {/* Back Button and Profile Header */}
+                <div className="flex items-center gap-4">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      setSelectedProfileId(null);
+                      setMainView("welcome");
+                    }}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back
+                  </Button>
+                </div>
+                
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-bold">{selectedProfile.name}</h2>
@@ -490,38 +520,50 @@ const Index = () => {
                   </div>
                 )}
               </div>
+            ) : null}
+              </>
             ) : (
               <div className="flex items-center justify-center h-[calc(100vh-200px)]">
                 <div className="text-center space-y-6 max-w-md">
-                  <h3 className="text-xl font-semibold">Welcome to Present Ponder!</h3>
                   <p className="text-muted-foreground">
-                    Get personalized gift recommendations in just a few clicks
+                    Choose how you'd like to get started
                   </p>
                   
                   <div className="space-y-3">
-                    <Link to="/guest" className="block">
-                      <Button size="lg" className="w-full" variant="default">
-                        <Gift className="w-5 h-5 mr-2" />
-                        Try Guest Mode - Quick & Easy!
-                      </Button>
-                    </Link>
-                    
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-300"></div>
-                      </div>
-                      <div className="relative flex justify-center text-sm">
-                        <span className="bg-background px-2 text-muted-foreground">or</span>
-                      </div>
-                    </div>
+                    <Button 
+                      size="lg" 
+                      className="w-full" 
+                      variant="default"
+                      onClick={() => setMainView("quick-recommendation")}
+                    >
+                      <Zap className="w-5 h-5 mr-2" />
+                      Quick Gift Recommendation
+                    </Button>
                     
                     <Button 
+                      size="lg" 
                       variant="outline" 
-                      onClick={() => setSidebarOpen(true)} 
+                      className="w-full"
+                      onClick={() => {
+                        setIsCreatingProfile(true);
+                        setMainView("manage-profiles");
+                      }}
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Create Profile
+                    </Button>
+                    
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      onClick={() => {
+                        setMainView("manage-profiles");
+                        setSidebarOpen(true);
+                      }} 
                       className="w-full"
                     >
-                      <UserCircle className="w-4 h-4 mr-2" />
-                      Manage Saved Profiles
+                      <UserCircle className="w-5 h-5 mr-2" />
+                      Manage Profiles
                     </Button>
                   </div>
                 </div>
