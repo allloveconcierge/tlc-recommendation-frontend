@@ -9,13 +9,20 @@ import { AuthCallback } from "./pages/AuthCallback";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GuestMode from "./components/GuestMode";
-import { useState } from "react";
+import React, { useState } from "react";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { user, loading } = useAuth();
   const [guestMode, setGuestMode] = useState(false);
+
+  // Reset guest mode when user signs out
+  React.useEffect(() => {
+    if (!user) {
+      setGuestMode(false);
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -33,9 +40,9 @@ const AppContent = () => {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/guest" element={<GuestMode />} />
       <Route path="/" element={
-        (!user && !guestMode) ? 
-          <AuthForm onAuthSuccess={() => setGuestMode(true)} /> : 
-          <Index />
+        user ? <Index /> : 
+        guestMode ? <Index /> :
+        <AuthForm onAuthSuccess={() => setGuestMode(true)} />
       } />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />

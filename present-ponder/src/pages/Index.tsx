@@ -29,8 +29,19 @@ const Index = () => {
   const { user, signOut } = useAuth();
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (user) {
+      loadData();
+    } else {
+      // Clear all data when user signs out
+      setProfiles([]);
+      setSelectedProfileId(null);
+      setEditingProfileId(null);
+      setIsCreatingProfile(false);
+      setCurrentRecommendations([]);
+      setHistory([]);
+      setAccumulatedNotes("");
+    }
+  }, [user]);
 
   const loadData = async () => {
     try {
