@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -11,6 +12,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Sparkles, CalendarIcon, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
 import { Profile } from "./ProfileList";
 import { cn } from "@/lib/utils";
+
+const OCCASIONS = [
+  "Birthday", "Anniversary", "Christmas", "Valentine's Day", "Mother's Day", 
+  "Father's Day", "Graduation", "Wedding", "Baby Shower", "Housewarming", 
+  "Just Because", "Thank You", "Congratulations", "Apology", "Get Well Soon"
+];
 
 interface OccasionFormProps {
   profile: Profile;
@@ -22,6 +29,7 @@ interface OccasionFormProps {
 export const OccasionForm = ({ profile, onGenerate, isGenerating, accumulatedNotes }: OccasionFormProps) => {
   const [date, setDate] = useState<Date>();
   const [occasion, setOccasion] = useState("");
+  const [customOccasion, setCustomOccasion] = useState("");
   const [notes, setNotes] = useState("");
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [errors, setErrors] = useState({
@@ -31,7 +39,8 @@ export const OccasionForm = ({ profile, onGenerate, isGenerating, accumulatedNot
 
   const validateForm = () => {
     const newErrors = {
-      occasion: !occasion.trim() ? "Please describe what's happening" : "",
+      occasion: !occasion ? "Please select an occasion" : 
+                (occasion === "Other" && !customOccasion.trim()) ? "Please describe the custom occasion" : "",
       date: !date ? "Please select a date" : "",
     };
     
@@ -42,7 +51,8 @@ export const OccasionForm = ({ profile, onGenerate, isGenerating, accumulatedNot
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm() && date) {
-      onGenerate({ date, occasion, notes });
+      const occasionValue = occasion === "Other" ? customOccasion : occasion;
+      onGenerate({ date, occasion: occasionValue, notes });
     }
   };
 
@@ -82,14 +92,27 @@ export const OccasionForm = ({ profile, onGenerate, isGenerating, accumulatedNot
           <Label htmlFor="occasion" className="flex items-center gap-1">
             What's happening? <span className="text-muted-foreground">*</span>
           </Label>
-          <Input
-            id="occasion"
-            placeholder="e.g. work anniversary, just because"
-            value={occasion}
-            onChange={(e) => handleOccasionChange(e.target.value)}
-            className={errors.occasion ? "border-red-500 focus-visible:ring-red-500" : ""}
-            required
-          />
+          <Select value={occasion} onValueChange={handleOccasionChange} required>
+            <SelectTrigger className={errors.occasion ? "border-red-500 focus-visible:ring-red-500" : ""}>
+              <SelectValue placeholder="Select occasion" />
+            </SelectTrigger>
+            <SelectContent>
+              {OCCASIONS.map((occ) => (
+                <SelectItem key={occ} value={occ}>
+                  {occ}
+                </SelectItem>
+              ))}
+              <SelectItem value="Other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+          {occasion === "Other" && (
+            <Input
+              placeholder="Describe the occasion"
+              value={customOccasion}
+              onChange={(e) => setCustomOccasion(e.target.value)}
+              className="mt-2"
+            />
+          )}
           {errors.occasion && (
             <Alert variant="destructive" className="py-2">
               <AlertCircle className="h-4 w-4" />

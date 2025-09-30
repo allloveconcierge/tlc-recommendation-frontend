@@ -8,6 +8,7 @@ import { AuthForm } from "@/components/AuthForm";
 import { AuthCallback } from "./pages/AuthCallback";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import GuestMode from "./components/GuestMode";
 import { useState } from "react";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/guest" element={<GuestMode />} />
       <Route path="/" element={
         (!user && !guestMode) ? 
           <AuthForm onAuthSuccess={() => setGuestMode(true)} /> : 

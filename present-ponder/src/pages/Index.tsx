@@ -7,6 +7,7 @@ import { RecommendationsList, RecommendationSet } from "@/components/Recommendat
 import { Recommendation } from "@/components/RecommendationCard";
 import { Button } from "@/components/ui/button";
 import { Gift, UserCircle, Pencil, Menu, X, LogOut } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { DatabaseService, GiftProfile, RecommendationSet as DBRecommendationSet } from "@/lib/database";
@@ -480,14 +481,38 @@ const Index = () => {
               </div>
             ) : (
               <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-                <div className="text-center space-y-4 max-w-md">
-                  <h3 className="text-xl font-semibold">Select or Create a Profile</h3>
+                <div className="text-center space-y-6 max-w-md">
+                  <h3 className="text-xl font-semibold">Welcome to Present Ponder!</h3>
                   <p className="text-muted-foreground">
-                    Choose a profile from the list or create a new one to get personalized gift recommendations
+                    Get personalized gift recommendations in just a few clicks
                   </p>
-                  <Button onClick={() => setSidebarOpen(true)} className="mt-4">
-                    Open Profiles
-                  </Button>
+                  
+                  <div className="space-y-3">
+                    <Link to="/guest" className="block">
+                      <Button size="lg" className="w-full" variant="default">
+                        <Gift className="w-5 h-5 mr-2" />
+                        Try Guest Mode - Quick & Easy!
+                      </Button>
+                    </Link>
+                    
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="bg-background px-2 text-muted-foreground">or</span>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSidebarOpen(true)} 
+                      className="w-full"
+                    >
+                      <UserCircle className="w-4 h-4 mr-2" />
+                      Manage Saved Profiles
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
