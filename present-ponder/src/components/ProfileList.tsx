@@ -37,7 +37,6 @@ export const ProfileList = ({ profiles, selectedProfileId, onSelectProfile, onNe
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b">
-        <h2 className="text-xl font-bold mb-4">Profiles</h2>
         <Button onClick={onNewProfile} className="w-full" variant="outline">
           <Plus className="h-4 w-4 mr-2" />
           New Profile
@@ -57,7 +56,7 @@ export const ProfileList = ({ profiles, selectedProfileId, onSelectProfile, onNe
               {profiles.map((profile) => (
                 <div
                   key={profile.id}
-                  className={`w-full flex items-center gap-2 p-3 rounded-lg transition-colors ${
+                  className={`w-full flex items-center gap-2 p-3 rounded-lg transition-colors hover:bg-muted/50 ${
                     selectedProfileId === profile.id ? "bg-muted" : ""
                   }`}
                 >

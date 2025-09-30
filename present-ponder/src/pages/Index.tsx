@@ -6,7 +6,7 @@ import { OccasionForm } from "@/components/OccasionForm";
 import { RecommendationsList, RecommendationSet } from "@/components/RecommendationsList";
 import { Recommendation } from "@/components/RecommendationCard";
 import { Button } from "@/components/ui/button";
-import { Gift, UserCircle, Pencil } from "lucide-react";
+import { Gift, UserCircle, Pencil, Menu, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DatabaseService, GiftProfile, RecommendationSet as DBRecommendationSet } from "@/lib/database";
 
@@ -22,6 +22,7 @@ const Index = () => {
   const [currentRecommendations, setCurrentRecommendations] = useState<Recommendation[]>([]);
   const [history, setHistory] = useState<RecommendationSet[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -281,50 +282,84 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6">
-        <header className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2 text-foreground">
-            TLC
-          </h1>
-          <p className="text-muted-foreground">Find the perfect gift for anyone, powered by smart recommendations</p>
-        </header>
-
-        <div className="grid lg:grid-cols-[320px_1fr] gap-6 max-w-7xl mx-auto">
-          {/* Left Panel - Profile List */}
-          <div className="lg:sticky lg:top-6 h-fit">
-            <div className="bg-card rounded-2xl shadow-lg border h-[calc(100vh-180px)] lg:h-[calc(100vh-120px)]">
-              <ProfileList
-                profiles={profiles}
-                selectedProfileId={selectedProfileId}
-                onSelectProfile={(id) => {
-                  setSelectedProfileId(id);
-                  setProfileView("get-gift");
-                }}
-                onEditProfile={(id) => {
-                  setEditingProfileId(id);
-                  setIsCreatingProfile(false);
-                  setSelectedProfileId(null);
-                }}
-                onNewProfile={() => {
-                  setIsCreatingProfile(true);
-                  setEditingProfileId(null);
-                  setSelectedProfileId(null);
-                }}
-              />
-            </div>
+      {/* Modern Header */}
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40">
+        <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="p-2 h-8 w-8"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+            <h1 className="text-lg font-semibold text-foreground">TLC</h1>
           </div>
+        </div>
+      </header>
 
-          {/* Right Panel - Form or Recommendations */}
-          <div className="bg-card rounded-2xl p-6 shadow-lg border min-h-[600px]">
+      <div className="flex h-[calc(100vh-65px)]">
+        {/* Sidebar Overlay */}
+        {sidebarOpen && (
+          <>
+            <div 
+              className="fixed inset-0 bg-black/20 z-40"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <div className="fixed left-0 top-0 h-full w-80 bg-background border-r z-50 flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="font-semibold">Profiles</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="p-2 h-8 w-8"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <ProfileList
+                  profiles={profiles}
+                  selectedProfileId={selectedProfileId}
+                  onSelectProfile={(id) => {
+                    setSelectedProfileId(id);
+                    setProfileView("get-gift");
+                    setSidebarOpen(false);
+                  }}
+                  onEditProfile={(id) => {
+                    setEditingProfileId(id);
+                    setIsCreatingProfile(false);
+                    setSelectedProfileId(null);
+                    setSidebarOpen(false);
+                  }}
+                  onNewProfile={() => {
+                    setIsCreatingProfile(true);
+                    setEditingProfileId(null);
+                    setSelectedProfileId(null);
+                    setSidebarOpen(false);
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 p-6 overflow-auto">
+          <div className="max-w-4xl mx-auto">
             {isCreatingProfile || editingProfileId ? (
-              <ProfileForm
-                profile={editingProfile}
-                onSave={handleSaveProfile}
-                onCancel={() => {
-                  setIsCreatingProfile(false);
-                  setEditingProfileId(null);
-                }}
-              />
+              <div className="bg-card rounded-lg border p-6">
+                <ProfileForm
+                  profile={editingProfile}
+                  onSave={handleSaveProfile}
+                  onCancel={() => {
+                    setIsCreatingProfile(false);
+                    setEditingProfileId(null);
+                  }}
+                />
+              </div>
             ) : selectedProfile ? (
               <div className="space-y-6">
                 {/* Profile Header */}
@@ -358,14 +393,16 @@ const Index = () => {
                 {/* Content based on selected view */}
                 {profileView === "get-gift" ? (
                   <div className="space-y-6">
-                    <OccasionForm
-                      profile={selectedProfile}
-                      onGenerate={handleGenerate}
-                      isGenerating={isGenerating}
-                      accumulatedNotes={accumulatedNotes}
-                    />
+                    <div className="bg-card rounded-lg border p-6">
+                      <OccasionForm
+                        profile={selectedProfile}
+                        onGenerate={handleGenerate}
+                        isGenerating={isGenerating}
+                        accumulatedNotes={accumulatedNotes}
+                      />
+                    </div>
                     {(currentRecommendations.length > 0 || history.length > 0) && (
-                      <div className="border-t pt-6">
+                      <div className="bg-card rounded-lg border p-6">
                         <RecommendationsList
                           currentRecommendations={currentRecommendations}
                           history={history}
@@ -392,7 +429,7 @@ const Index = () => {
                     </div>
 
                     {/* Profile Info Card */}
-                    <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                    <div className="bg-card rounded-lg border p-6">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-muted-foreground">Gender:</span>
@@ -410,20 +447,25 @@ const Index = () => {
                     </div>
 
                     {/* Notes Section */}
-                    <ProfileNotes 
-                      profile={selectedProfile}
-                      onUpdateNotes={handleUpdateNotes}
-                    />
+                    <div className="bg-card rounded-lg border p-6">
+                      <ProfileNotes 
+                        profile={selectedProfile}
+                        onUpdateNotes={handleUpdateNotes}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex items-center justify-center h-[calc(100vh-200px)]">
                 <div className="text-center space-y-4 max-w-md">
                   <h3 className="text-xl font-semibold">Select or Create a Profile</h3>
                   <p className="text-muted-foreground">
                     Choose a profile from the list or create a new one to get personalized gift recommendations
                   </p>
+                  <Button onClick={() => setSidebarOpen(true)} className="mt-4">
+                    Open Profiles
+                  </Button>
                 </div>
               </div>
             )}
