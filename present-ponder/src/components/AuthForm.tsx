@@ -111,10 +111,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Welcome back!",
-          description: "You have been signed in successfully.",
-        });
         onAuthSuccess();
       }
     } catch (error) {
@@ -174,10 +170,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           description: "We've sent you a confirmation link. Please check your email (including spam folder) and click the link to activate your account.",
         });
       } else if (data.user?.email_confirmed_at) {
-        toast({
-          title: "Account created!",
-          description: "Your account has been created and verified. You can now sign in.",
-        });
         onAuthSuccess();
       } else {
         toast({
@@ -201,10 +193,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
     if (passcode === BETA_PASSCODE) {
       setPasscodeVerified(true);
       localStorage.setItem(PASSCODE_STORAGE_KEY, BETA_PASSCODE);
-      toast({
-        title: "Access granted!",
-        description: "Welcome to the TLC closed beta.",
-      });
     } else {
       toast({
         title: "Invalid passcode",
@@ -250,10 +238,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   };
 
   const handleGuestMode = () => {
-    toast({
-      title: "Guest mode",
-      description: "You can browse the app, but profiles won't be saved permanently.",
-    });
     onAuthSuccess();
   };
 
@@ -262,12 +246,9 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Gift className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">TLC</h1>
-          </div>
+          <h1 className="text-2xl font-bold">TLC</h1>
           <p className="text-muted-foreground">
-            Your AI-powered gift recommendation assistant
+            The operating system for relationships that matter to you
           </p>
         </div>
 

@@ -41,7 +41,7 @@ const AppContent = () => {
       <Route path="/guest" element={<GuestMode />} />
       <Route path="/" element={
         user ? <Index /> : 
-        guestMode ? <Index /> :
+        guestMode ? <GuestMode /> :
         <AuthForm onAuthSuccess={() => setGuestMode(true)} />
       } />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
