@@ -13,7 +13,7 @@ interface AuthFormProps {
   onAuthSuccess: () => void;
 }
 
-const BETA_PASSCODE = "tlc-banana-parrot-2025";
+const BETA_PASSCODE = "tlcbeta2025";
 const PASSCODE_STORAGE_KEY = "tlc-beta-access";
 
 export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
@@ -270,7 +270,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
                   <Label htmlFor="passcode">Beta Passcode</Label>
                   <Input
                     id="passcode"
-                    type="password"
+                    type="text"
                     placeholder="Enter your beta access code"
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
