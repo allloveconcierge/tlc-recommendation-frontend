@@ -1,7 +1,7 @@
 [build]
-  command = "cd present-ponder && npm ci && npm run build"
-  publish = "present-ponder/dist"
-  base = "."
+  command = "npm ci && npm run build"
+  publish = "dist"
+  base = "present-ponder"
 
 [[redirects]]
   from = "/*"
@@ -10,13 +10,3 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_VERSION = "10"
-
-# Only build when frontend changes
-[build.ignore]
-  command = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- present-ponder/"
-
-# Environment variables (set these in Netlify dashboard)
-# VITE_API_BASE_URL = "https://your-backend-url.railway.app"
-# VITE_SUPABASE_URL = "your_supabase_url"
-# VITE_SUPABASE_PUBLISHABLE_KEY = "your_supabase_key"
