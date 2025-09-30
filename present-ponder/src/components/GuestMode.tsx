@@ -99,7 +99,7 @@ export default function GuestMode({ onExitGuest }: GuestModeProps) {
         web_search_enabled: true
       };
 
-      const API_BASE_URL = "http://localhost:8000";
+      const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:8000";
       
       console.log('API Request:', {
         url: `${API_BASE_URL}/recommend`,
